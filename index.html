@@ -1,0 +1,901 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>おしりたたきプログラム | AI時代のブログ伴走サポート</title>
+    <meta
+      name="description"
+      content="AIライティングを活用しながら、自分のペースで100記事公開を目指すブログ伴走サービス。毎週の声かけ、月末報告、月1回相談、チャット相談で継続を支えます。"
+    />
+    <style>
+      :root {
+        --ink: #25313d;
+        --muted: #647383;
+        --line: #d8e7f4;
+        --paper: #f7fbff;
+        --white: #ffffff;
+        --mint: #9ad8e6;
+        --mint-dark: #357ca8;
+        --coral: #6faee8;
+        --gold: #d5eef8;
+        --blue: #1f73d6;
+        --blue-dark: #1559ad;
+        --sky: #bce9ef;
+        --shadow: 0 18px 48px rgba(45, 94, 132, 0.14);
+        --radius: 8px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--paper);
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        line-height: 1.75;
+      }
+
+      p,
+      li,
+      summary,
+      .included span {
+        line-break: strict;
+        text-wrap: pretty;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .hero {
+        position: relative;
+        min-height: 88vh;
+        display: grid;
+        align-items: center;
+        overflow: hidden;
+        color: var(--ink);
+        background:
+          linear-gradient(90deg, rgba(187, 235, 240, 0.9), rgba(133, 181, 225, 0.8)),
+          linear-gradient(135deg, #c6edf0 0%, #a9d9ec 43%, #8eb7df 100%);
+      }
+
+      .hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        opacity: 0.18;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.34) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.34) 1px, transparent 1px);
+        background-size: 68px 68px;
+        transform: rotate(-2deg) scale(1.05);
+      }
+
+      .hero-scene {
+        position: absolute;
+        right: 5vw;
+        bottom: 0;
+        width: min(50vw, 700px);
+        opacity: 0.92;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      .hero-character {
+        display: block;
+        width: 100%;
+        height: auto;
+        filter: drop-shadow(0 22px 38px rgba(37, 49, 61, 0.18));
+      }
+
+      .note {
+        position: absolute;
+        width: 164px;
+        min-height: 104px;
+        padding: 18px;
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+        color: var(--ink);
+        box-shadow: 0 14px 36px rgba(45, 94, 132, 0.1);
+        z-index: 1;
+      }
+
+      .note strong {
+        display: block;
+        font-size: 32px;
+        line-height: 1;
+      }
+
+      .note span {
+        display: block;
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      .note.one {
+        position: absolute;
+        top: 8vh;
+        left: 58%;
+        margin-left: -82px;
+        transform: rotate(2deg);
+      }
+
+      .note.two {
+        position: absolute;
+        left: 28px;
+        bottom: 28px;
+        transform: rotate(-2deg);
+      }
+
+      .wrap {
+        position: relative;
+        width: min(1080px, calc(100% - 48px));
+        margin: 0 auto;
+      }
+
+      .hero-content {
+        position: relative;
+        z-index: 1;
+        max-width: 620px;
+        padding: 96px 0 112px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 18px;
+        color: rgba(37, 49, 61, 0.76);
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0;
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 34px;
+        height: 2px;
+        background: var(--blue);
+      }
+
+      h1 {
+        margin: 0;
+        max-width: 660px;
+        font-size: clamp(52px, 5.8vw, 78px);
+        line-height: 1.12;
+        letter-spacing: 0;
+        font-weight: 350;
+      }
+
+      h1 .title-line {
+        display: block;
+        white-space: nowrap;
+      }
+
+      .lead {
+        max-width: 610px;
+        margin: 28px 0 0;
+        font-size: clamp(17px, 1.45vw, 20px);
+        line-height: 2;
+        color: rgba(37, 49, 61, 0.78);
+        font-weight: 700;
+        text-shadow: none;
+      }
+
+      .lead-line {
+        display: block;
+      }
+
+      .sentence-line {
+        display: block;
+      }
+
+      .fixed-line {
+        display: block;
+        white-space: nowrap;
+      }
+
+      .nowrap {
+        white-space: nowrap;
+      }
+
+      .keep {
+        white-space: nowrap;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 34px;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+        padding: 0 22px;
+        border: 1px solid transparent;
+        border-radius: var(--radius);
+        text-decoration: none;
+        font-weight: 800;
+        box-shadow: 0 12px 28px rgba(31, 115, 214, 0.24);
+      }
+
+      .button.primary {
+        background: var(--blue);
+        color: var(--white);
+      }
+
+      .button.primary:hover {
+        background: var(--blue-dark);
+      }
+
+      .button.secondary {
+        border-color: rgba(31, 115, 214, 0.32);
+        background: rgba(255, 255, 255, 0.34);
+        color: var(--blue-dark);
+        box-shadow: none;
+      }
+
+      .price .button.primary {
+        background: var(--white);
+        color: var(--blue-dark);
+        box-shadow: 0 12px 28px rgba(15, 61, 111, 0.18);
+      }
+
+      section {
+        padding: 92px 0;
+      }
+
+      .section-head {
+        max-width: 720px;
+        margin-bottom: 40px;
+      }
+
+      .section-kicker {
+        margin: 0 0 8px;
+        color: var(--blue-dark);
+        font-weight: 800;
+      }
+
+      h2 {
+        margin: 0;
+        max-width: 860px;
+        font-size: clamp(30px, 4vw, 48px);
+        line-height: 1.18;
+        letter-spacing: 0;
+        text-wrap: balance;
+      }
+
+      .heading-line {
+        display: block;
+      }
+
+      .section-copy {
+        max-width: 680px;
+        margin: 20px 0 0;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1.95;
+      }
+
+      .section-copy.wide {
+        max-width: 860px;
+      }
+
+      .band {
+        background: var(--white);
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 24px;
+      }
+
+      .card {
+        min-height: 100%;
+        padding: 28px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--white);
+        box-shadow: 0 10px 26px rgba(23, 33, 43, 0.06);
+      }
+
+      .card h3 {
+        margin: 16px 0 10px;
+        font-size: 21px;
+        line-height: 1.35;
+      }
+
+      .card p {
+        max-width: 29em;
+        margin: 0;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.9;
+      }
+
+      .icon {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: #e7f3ff;
+        color: var(--blue-dark);
+        font-weight: 900;
+      }
+
+      .path {
+        display: grid;
+        grid-template-columns: 360px 1fr;
+        gap: 56px;
+        align-items: start;
+      }
+
+      .progress-panel {
+        position: sticky;
+        top: 24px;
+        padding: 28px;
+        border-radius: var(--radius);
+        color: var(--white);
+        background: linear-gradient(140deg, #2f7bc3, #7dbde7);
+        box-shadow: var(--shadow);
+      }
+
+      .progress-number {
+        font-size: 96px;
+        line-height: 1;
+        font-weight: 900;
+      }
+
+      .meter {
+        height: 12px;
+        margin: 20px 0 14px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.24);
+      }
+
+      .meter span {
+        display: block;
+        width: 68%;
+        height: 100%;
+        background: linear-gradient(90deg, #dff5ff, var(--blue));
+      }
+
+      .steps {
+        display: grid;
+        gap: 0;
+      }
+
+      .step {
+        display: grid;
+        grid-template-columns: 54px 1fr;
+        gap: 22px;
+        padding: 28px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .step:last-child {
+        border-bottom: 0;
+      }
+
+      .step-num {
+        width: 54px;
+        height: 54px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        color: var(--white);
+        background: var(--blue);
+        font-weight: 900;
+      }
+
+      .step h3 {
+        margin: 0 0 6px;
+        font-size: 23px;
+      }
+
+      .step p {
+        max-width: 43em;
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.85;
+      }
+
+      .compare {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px;
+      }
+
+      .compare-box {
+        padding: 28px;
+        border-radius: var(--radius);
+        border: 1px solid var(--line);
+        background: var(--white);
+      }
+
+      .compare-box.old {
+        background: #f4f7fb;
+      }
+
+      .compare-box h3 {
+        margin: 0 0 16px;
+        font-size: 24px;
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 1.15em;
+      }
+
+      li + li {
+        margin-top: 10px;
+      }
+
+      .price {
+        background: linear-gradient(135deg, #2b78c4, #98d6ea);
+        color: var(--white);
+      }
+
+      .price .section-kicker,
+      .price .section-copy {
+        color: rgba(255, 255, 255, 0.82);
+      }
+
+      .price-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 420px;
+        gap: 56px;
+        align-items: start;
+      }
+
+      .price .section-head {
+        margin-bottom: 0;
+      }
+
+      .price .section-copy {
+        max-width: 600px;
+      }
+
+      .included {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 28px;
+      }
+
+      .included span {
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+        padding: 12px 14px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.08);
+        font-weight: 700;
+      }
+
+      .cta-box {
+        padding: 34px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .cta-box strong {
+        display: block;
+        margin-bottom: 18px;
+        font-size: 26px;
+        line-height: 1.35;
+        letter-spacing: 0;
+      }
+
+      .cta-box p {
+        max-width: 31em;
+        margin: 0 0 24px;
+        line-height: 1.9;
+      }
+
+      .faq {
+        display: grid;
+        gap: 12px;
+      }
+
+      details {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--white);
+      }
+
+      summary {
+        cursor: pointer;
+        padding: 20px 22px;
+        font-weight: 800;
+      }
+
+      details p {
+        margin: 0;
+        padding: 0 22px 22px;
+        color: var(--muted);
+      }
+
+      footer {
+        padding: 36px 0;
+        color: var(--muted);
+        border-top: 1px solid var(--line);
+        background: var(--white);
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0) rotate(0deg);
+        }
+        50% {
+          transform: translateY(-16px) rotate(4deg);
+        }
+      }
+
+      @media (max-width: 900px) {
+        .hero {
+          min-height: auto;
+        }
+
+        .hero-scene {
+          width: min(74vw, 500px);
+          right: -18vw;
+          bottom: -24px;
+          opacity: 0.92;
+        }
+
+        .hero-content {
+          max-width: 680px;
+          padding: 84px 0 96px;
+        }
+
+        .grid,
+        .path,
+        .compare,
+        .price-layout {
+          grid-template-columns: 1fr;
+        }
+
+        .included {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .progress-panel {
+          position: relative;
+          top: auto;
+        }
+
+        .note.one {
+          left: auto;
+          right: 24px;
+          top: 24px;
+          margin-left: 0;
+        }
+
+        .note.two {
+          display: none;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .wrap {
+          width: min(100% - 32px, 1080px);
+        }
+
+        h1 {
+          font-size: 42px;
+          line-height: 1.16;
+        }
+
+        h2 {
+          font-size: 28px;
+          line-height: 1.28;
+        }
+
+        .lead {
+          font-size: 16px;
+          line-height: 1.9;
+        }
+
+        .lead-line {
+          display: inline;
+        }
+
+        .nowrap {
+          white-space: normal;
+        }
+
+        .fixed-line {
+          white-space: normal;
+        }
+
+        .note {
+          display: none;
+        }
+
+        .included {
+          grid-template-columns: 1fr;
+        }
+
+        section {
+          padding: 64px 0;
+        }
+
+        .hero-actions {
+          flex-direction: column;
+        }
+
+        .button {
+          width: 100%;
+        }
+
+        .card,
+        .compare-box,
+        .cta-box,
+        .progress-panel {
+          padding: 22px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-scene" aria-hidden="true">
+        <img class="hero-character" src="assets/main-character.png" alt="" />
+      </div>
+      <div class="note one" aria-hidden="true"><strong>毎週</strong><span>声かけで止まらない</span></div>
+      <div class="note two" aria-hidden="true"><strong>月1</strong><span>30分の相談枠</span></div>
+      <div class="wrap">
+        <div class="hero-content">
+          <div class="eyebrow">AI時代のブログ伴走サポート</div>
+          <h1><span class="title-line">おしりたたき</span><span class="title-line">プログラム</span></h1>
+          <p class="lead">
+            <span class="lead-line">AIライティングを味方につけて、自分のペースで書き続ける。</span>
+            <span class="lead-line">毎週の声かけと月末の振り返りで、<span class="keep">100記事公開</span>まで一人に<span class="nowrap">しないプログラムです。</span></span>
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="https://docs.google.com/forms/d/e/1FAIpQLSdb98R0L1mDZ2CLA8c0sJis3BoMFFAa1zy5vIlQ0duvwuYnUQ/viewform?usp=publish-editor">サービスを申し込む</a>
+            <a class="button secondary" href="#service">内容を見る</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section id="service">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="section-kicker">Renewal</p>
+            <h2><span class="heading-line">記事を書く力より、</span><span class="heading-line">書き続ける環境を整えます</span></h2>
+            <p class="section-copy">
+              <span class="sentence-line">AIライティングツールの普及で、記事作成のハードルは下がりました。</span>
+              <span class="fixed-line">だからこそ必要なのは、細かいタスク管理よりも「止まらずに積み上げる伴走」です。</span>
+            </p>
+          </div>
+          <div class="grid">
+            <article class="card">
+              <div class="icon">1</div>
+              <h3>100記事という明確なゴール</h3>
+              <p>
+                <span class="sentence-line">ゴールは「自分のペースで書き続けて、100記事にたどり着く」こと。</span>
+                <span class="sentence-line">早さよりも、止まらない設計を大切にします。</span>
+              </p>
+            </article>
+            <article class="card">
+              <div class="icon">2</div>
+              <h3>AIライティング前提の進め方</h3>
+              <p>
+                <span class="sentence-line">記事数やテーマを一緒に整理します。</span>
+                <span class="sentence-line">手が止まる原因をほどき、次の記事へ進める状態を作ります。</span>
+              </p>
+            </article>
+            <article class="card">
+              <div class="icon">3</div>
+              <h3>一人じゃない継続環境</h3>
+              <p>
+                <span class="sentence-line">毎週の声かけ、月末の報告、チャット相談で、書くペースを見失わないように支えます。</span>
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="band">
+        <div class="wrap path">
+          <aside class="progress-panel">
+            <p class="section-kicker">Goal</p>
+            <div class="progress-number">100</div>
+            <p><span class="sentence-line">記事公開まで、あなたのペースで積み上げます。</span></p>
+            <div class="meter"><span></span></div>
+            <small>毎月の報告をもとに、翌月の目標を調整します。</small>
+          </aside>
+          <div>
+            <div class="section-head">
+              <p class="section-kicker">Support</p>
+              <h2>新しいサポート内容</h2>
+            </div>
+            <div class="steps">
+              <div class="step">
+                <div class="step-num">01</div>
+                <div>
+                  <h3>毎週の声かけ</h3>
+                  <p>
+                    <span class="sentence-line">変わらず毎週、こちらから声をかけます。</span>
+                    <span class="sentence-line">書けている週も、止まりそうな週も、ペースを戻すきっかけを作ります。</span>
+                  </p>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">02</div>
+                <div>
+                  <h3>月末に記事数を報告</h3>
+                  <p>
+                    <span class="sentence-line">月末に、今月書いた記事数を教えてください。</span>
+                    <span class="sentence-line">こちらから声をかけるので、報告のタイミングを忘れにくくなります。</span>
+                  </p>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">03</div>
+                <div>
+                  <h3>翌月の目標を一緒に決める</h3>
+                  <p>
+                    <span class="sentence-line">実績を見ながら、無理なく続けられる翌月の記事数を一緒に設定します。</span>
+                    <span class="sentence-line">高すぎる目標で折れないように調整します。</span>
+                  </p>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">04</div>
+                <div>
+                  <h3>月1回・30分の相談枠</h3>
+                  <p>
+                    <span class="sentence-line">「何を書けばいいか」「この方向性で合っているか」などを相談できます。</span>
+                    <span class="sentence-line">使わない月があっても大丈夫です。</span>
+                  </p>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">05</div>
+                <div>
+                  <h3>チャット相談</h3>
+                  <p>
+                    <span class="sentence-line">迷った時に、いつでも気軽に相談できます。</span>
+                    <span class="sentence-line">小さな不安を放置せず、記事作成の流れを止めないための窓口です。</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="wrap">
+          <div class="section-head">
+            <p class="section-kicker">Change</p>
+            <h2><span class="heading-line">細かいタスク管理から、</span><span class="heading-line">記事数の積み上げへ</span></h2>
+            <p class="section-copy wide">
+              <span class="fixed-line">リニューアル後は、毎週のタスク報告ではなく、月末の記事数報告を中心に進めます。</span>
+              <span class="sentence-line">自分のペースを守りながら、前に進める形です。</span>
+            </p>
+          </div>
+          <div class="compare">
+            <div class="compare-box old">
+              <h3>なくなるもの</h3>
+              <ul>
+                <li>毎月月初めのタスク設定</li>
+                <li>毎週のタスク報告</li>
+                <li>細かい進捗管理に追われる感覚</li>
+              </ul>
+            </div>
+            <div class="compare-box">
+              <h3>これから重視するもの</h3>
+              <ul>
+                <li>100記事公開に向けた記事数の積み上げ</li>
+                <li>月末の振り返りと翌月目標の設定</li>
+                <li>AIライティングを使った継続しやすい執筆習慣</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="price" id="entry">
+        <div class="wrap price-layout">
+          <div>
+            <p class="section-kicker">For You</p>
+            <h2>こんな人に向いています</h2>
+            <p class="section-copy">
+              <span class="sentence-line">ひとりだと止まってしまう。</span>
+              <span class="sentence-line">でも、細かく管理されすぎると苦しくなる。</span>
+              <span class="sentence-line">そんな人のための、AI時代のブログ伴走サービスです。</span>
+            </p>
+            <div class="included">
+              <span>AIで記事を書きたい</span>
+              <span>100記事を目指したい</span>
+              <span>月ごとに目標を整えたい</span>
+              <span>迷った時に相談したい</span>
+            </div>
+          </div>
+          <div class="cta-box">
+            <strong><span class="heading-line">一人で続ける不安を、</span><span class="heading-line">そろそろ手放しませんか。</span></strong>
+            <p>
+              <span class="sentence-line">まずは今の状況を聞かせてください。</span>
+              <span class="sentence-line">記事数やAIの使い方、止まっている理由を一緒に整理します。</span>
+            </p>
+            <a class="button primary" href="https://docs.google.com/forms/d/e/1FAIpQLSdb98R0L1mDZ2CLA8c0sJis3BoMFFAa1zy5vIlQ0duvwuYnUQ/viewform?usp=publish-editor">サービスを申し込む</a>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="wrap">
+          <div class="section-head">
+            <p class="section-kicker">FAQ</p>
+            <h2>よくある質問</h2>
+          </div>
+          <div class="faq">
+            <details>
+              <summary>AIライティング初心者でも大丈夫ですか？</summary>
+              <p>
+                <span class="sentence-line">大丈夫です。</span>
+                <span class="sentence-line">AIの使い方そのものよりも、記事作成を止めないための相談や目標設定を中心にサポートします。</span>
+              </p>
+            </details>
+            <details>
+              <summary>月1回の相談を使わなかった場合、翌月に持ち越せますか？</summary>
+              <p>
+                <span class="sentence-line">持ち越しはありません。</span>
+                <span class="sentence-line">必要な月だけ、気軽に使っていただく形です。</span>
+              </p>
+            </details>
+            <details>
+              <summary>毎週のタスク報告は必要ですか？</summary>
+              <p>
+                <span class="fixed-line">不要です。ただし、管理シートは継続して使えます。</span>
+                <span class="sentence-line">日々の振り返りや、自分の作業ペースを確認するための記録として、引き続き活用してください。</span>
+                <span class="sentence-line">リニューアル後は、その記録も参考にしながら、月末の記事数報告と翌月の目標設定を一緒に進めます。</span>
+              </p>
+            </details>
+            <details>
+              <summary>100記事まで必ず早く書かないといけませんか？</summary>
+              <p>
+                <span class="sentence-line">いいえ。</span>
+                <span class="sentence-line">大切なのは、自分のペースで書き続けることです。</span>
+                <span class="sentence-line">無理な記事数ではなく、続けられる目標を一緒に決めます。</span>
+              </p>
+            </details>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap">おしりたたきプログラム / AI時代のブログ伴走サポート</div>
+    </footer>
+  </body>
+</html>
